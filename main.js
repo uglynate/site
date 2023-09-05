@@ -1,22 +1,61 @@
+import './style.css'
+
 import * as THREE from 'three';
 
+import{ OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-const renderer = new THREE.WebGLRenderer();
+
+scene.background = new THREE.Color(0xffffff);
+
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+const renderer = new THREE.WebGLRenderer({
+  canvas: document.querySelector('#bg'),
+});
+
+renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
+camera.position.setZ(40);
 
-const geometry = new THREE.BoxGeometry(1,1,1);
-const material = new THREE.MeshBasicMaterial({color: 0x00ff00});
-const cube = new THREE.Mesh(geometry,material);
-scene.add(cube);
+renderer.render(scene, camera);
 
-camera.position.z = 5;
+const texture = new THREE.TextureLoader().load( 'assets/logo-yellow.jpg' );
+
+const geometry = new THREE.SphereGeometry(10,32, 20);
+const material = new THREE.MeshStandardMaterial({
+  map: texture,
+});
+
+const anchorGeometry = new THREE.SphereGeometry(5,5,5);
+const anchor = new THREE.Mesh(anchorGeometry, material);
+
+const aboutGeometry = new THREE.SphereGeometry(5,20,15);
+//const aboutMaterial = new THREE.MeshStandardMaterial({map: THREE.Color(0x00FF00)});
+const aboutMesh = new THREE.Mesh(aboutGeometry, material);
+
+
+const sphere = new THREE.Mesh(geometry, material);
+
+const ambientLight = new THREE.AmbientLight(0xffffff);
+scene.add(ambientLight);
+
+scene.add(sphere);
+scene.add(anchor);
+anchor.add(aboutMesh);
+
+aboutMesh.position.x = 20;
+
+const controls = new OrbitControls(camera, renderer.domElement);
 
 function animate(){
-  requestAnimationFrame(animate);
-  renderer.render(scene,camera);
-  cube.rotation.x += 0.05;
-  cube.rotation.y += 0.03;
+  requestAnimationFrame( animate );
+  
+  controls.update();
+  sphere.rotation.y += .05;
+  anchor.rotateY(.03);
+  anchor.rotateX(.03);
+  aboutMesh.rotateY(.05);
+  renderer.render( scene, camera);
 }
 animate();
